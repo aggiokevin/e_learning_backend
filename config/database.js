@@ -14,7 +14,6 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const sslConfig = isProd
   ? {
-      // Aiven fournit un CA à utiliser pour valider le certificat
       ca: process.env.DB_CA_CERT
         ? process.env.DB_CA_CERT.replace(/\\n/g, '\n')
         : undefined,
@@ -25,7 +24,7 @@ const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT) || 3306,
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
+  password: process.env.DB_PASSWORD || '',   // <-- ici on utilise DB_PASSWORD
   database: process.env.DB_NAME || 'formapro',
   waitForConnections: true,
   connectionLimit: 10,
