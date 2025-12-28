@@ -2,7 +2,7 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Log rapide pour vérifier ce que voit le code
+// Log pour vérifier ce que voit le code (sera visible dans les logs Render)
 console.log('DB config utilisée:', {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -10,6 +10,8 @@ console.log('DB config utilisée:', {
   database: process.env.DB_NAME,
   nodeEnv: process.env.NODE_ENV,
 });
+
+const isProd = process.env.NODE_ENV === 'production';
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -20,11 +22,14 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  ssl:
-    process.env.NODE_ENV === 'production'
-      ? { rejectUnauthorized: true } // Aiven impose SSL
-      : undefined,
-  connectTimeout: 10000, // 10s
+  // Aiven impose SSL mais avec un certificat auto-signé,
+  // donc on désactive juste la vérification en production.
+  ssl: isProd
+    ? {
+        rejectUnauthorized: false,
+      }
+    : undefined,
+  connectTimeout: 10000,
 });
 
 // Fonction d'initialisation de la base de données
@@ -32,14 +37,14 @@ async function initDatabase() {
   try {
     console.log('🔄 Tentative de connexion à la base...');
     const connection = await pool.getConnection();
-    console.log('✅ Connexion MySQL Aiven OK');
+    console.log('✅ Connexion MySQL OK');
 
-    // Exemple simple pour le test : juste un SELECT 1
+    // Test simple
     const [rows] = await connection.query('SELECT 1 AS test');
     console.log('✅ Test query OK:', rows);
 
-    // Ici tu peux laisser TON code de création de tables si tu veux tester tout le schéma
-    // ...
+    // Tu peux remettre ici tes CREATE TABLE si tu veux:
+    // await connection.query(`CREATE TABLE IF NOT EXISTS ...`);
 
     connection.release();
     console.log('Base de données initialisée avec succès');
