@@ -46,9 +46,12 @@ exports.getAdminDashboard = async (req, res) => {
       'SELECT COUNT(*) as total, SUM(CASE WHEN is_published = TRUE THEN 1 ELSE 0 END) as published FROM courses'
     );
 
-    const [enrollmentStats] = await pool.query(
-      'SELECT COUNT(*) as total, SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed FROM enrollments'
-    );
+    const [enrollmentStats] = await pool.query(`
+  SELECT 
+    COUNT(*) AS total,
+    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed
+  FROM enrollments
+`);
 
     const completionRate = enrollmentStats[0].total > 0 
       ? (enrollmentStats[0].completed / enrollmentStats[0].total) * 100
