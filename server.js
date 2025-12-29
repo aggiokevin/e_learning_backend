@@ -46,14 +46,18 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 10000;
 
 async function startServer() {
+  // 1) Démarrer le serveur d'abord
+  app.listen(PORT, () => {
+    console.log(`✅ Serveur démarré sur le port ${PORT}`);
+  });
+
+  // 2) Initialiser la DB en parallèle, sans tuer le process
   try {
     await initDatabase();
-    app.listen(PORT, () => {
-      console.log(`✅ Serveur démarré sur le port ${PORT}`);
-    });
+    console.log('✅ Base de données initialisée avec succès');
   } catch (error) {
-    console.error('❌ Erreur au démarrage:', error);
-    process.exit(1);
+    console.error("⚠️ Erreur lors de l'initialisation de la base de données:", error);
+    // NE PAS faire process.exit(1) ici
   }
 }
 
